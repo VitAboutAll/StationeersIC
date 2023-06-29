@@ -1,0 +1,15 @@
+alias sensor d0
+
+#define SOLAR -539224550  # simple
+#define SOLAR -1545574413  # heavy type 1
+define SOLAR -934345724   # heavy type 2
+
+start:
+yield
+l r0 sensor Horizontal
+sb SOLAR Horizontal r0
+
+l r0 sensor Vertical
+sub r0 90 r0
+sb SOLAR Vertical r0
+j start
