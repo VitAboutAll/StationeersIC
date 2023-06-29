@@ -1,0 +1,53 @@
+alias Arc1 d0
+alias Arc2 d1
+alias Memory d2
+alias Led1 d3
+alias Led2 d4
+#alias DigitChute d5
+define Silo 1155865682
+alias Temp r15
+s Led1 On 1
+s Led2 On 1
+s db Setting 0
+s Memory Setting 0
+#s DigitChute On 1
+#sb Silo On 1
+loop:
+#check furnace1 On
+l Temp Arc1 On
+brnez Temp 3
+s Arc1 On 1
+#check furnace2 On
+l Temp Arc2 On
+brnez Temp 2
+s Arc2 On 1
+
+#check furnace occupied
+ls r1 Arc1 0 Occupied
+ls r2 Arc1 0 OccupantHash
+ls r3 Arc1 0 Quantity
+s Arc1 Activate r1
+s db Setting r2
+s Led1 Setting r3
+
+ls r11 Arc2 0 Occupied
+ls r12 Arc2 0 OccupantHash
+ls r13 Arc2 0 Quantity
+s Arc2 Activate r11
+s Memory Setting r12
+s Led2 Setting r13
+
+#s DigitChute Open 1
+yield
+
+#ls r5 DigitChute 0 Occupied
+#beqz r5 request
+#yield
+j loop
+
+#request:
+#sb Silo Open 1
+#sleep 1
+#sb Silo Open 0
+#yield
+#j loop
