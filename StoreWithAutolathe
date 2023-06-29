@@ -1,0 +1,68 @@
+# Store with Autolathe by VitAboutAll
+alias sort d0
+#alias led d1
+alias stanokMain d2
+alias stanokSlave d3
+alias sortTrash d5
+
+define CoalHash 1724793494
+define CobaltHash -983091249
+define UranHash -1516581844
+define DirtOre -1234745580
+define SilverOre -916518678 # for Vulkan
+
+s sort Mode 2
+s sort On 0
+
+s sortTrash Mode 2
+s sortTrash On 0
+
+loop:
+#check sorterTrash
+ls r0 sortTrash 0 Quantity
+bgtzal r0 sortingTrash
+
+# check stanok Open
+l r0 stanokMain Open
+slez r1 r0 # invert
+s stanokSlave Open r1
+beq r0 1 startRequest
+j loop
+
+startRequest:
+sleep 2 # ingots move slowly from stanok to sorter
+continueRequest:
+ls r0 sort 0 Quantity
+bgtz r0 sorting
+s stanokMain Open 0
+s stanokMain On 0
+yield
+j loop
+
+sorting:
+seq r0 r0 500
+s sort On 1
+s sort Output r0
+s sort On 0
+yield
+yield
+j continueRequest
+
+sortingTrash:
+ls r0 sortTrash 0 OccupantHash
+seq r1 r0 CoalHash
+seq r2 r0 CobaltHash
+or r1 r1 r2
+seq r2 r0 UranHash
+or r1 r1 r2
+seq r2 r0 DirtOre
+or r1 r1 r2
+seq r2 r0 SilverOre
+or r1 r1 r2
+slez r1 r1 # invert for change output slots
+s sortTrash On 1
+s sortTrash Output r1
+yield # need for correct off sorter
+s sortTrash On 0
+#yield
+j ra
