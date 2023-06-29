@@ -1,0 +1,57 @@
+# TankInformator by VitAboutAll
+define TankIns 272136332
+define TankLiqIns 608607718
+define LedS -815193061
+define LedM -53151617
+
+define Kelvin 273.15
+
+init:
+sbn LedS HASH("H2OM") On 1
+sbn LedS HASH("VolM") On 1
+sbn LedS HASH("O2M") On 1
+sbn LedS HASH("CO2M") On 1
+
+sbn LedM HASH("H2OP") On 1
+sbn LedM HASH("H2OT") On 1
+sbn LedM HASH("VolP") On 1
+sbn LedM HASH("VolT") On 1
+sbn LedM HASH("O2P") On 1
+sbn LedM HASH("O2T") On 1
+sbn LedM HASH("CO2P") On 1
+sbn LedM HASH("CO2T") On 1
+
+loop:
+lbn r0 TankLiqIns HASH("TankH2O") Temperature Sum
+sub r0 r0 Kelvin
+sbn LedM HASH("H2OT") Setting r0
+lbn r0 TankLiqIns HASH("TankH2O") Pressure Sum
+sbn LedM HASH("H2OP") Setting r0
+lbn r0 TankLiqIns HASH("TankH2O") Quantity Sum
+sbn LedS HASH("H2OM") Setting r0
+
+lbn r0 TankIns HASH("TankCO2") Temperature Sum
+sub r0 r0 Kelvin
+sbn LedM HASH("CO2T") Setting r0
+lbn r0 TankIns HASH("TankCO2") Pressure Sum
+sbn LedM HASH("CO2P") Setting r0
+lbn r0 TankIns HASH("TankCO2") Quantity Sum
+sbn LedS HASH("CO2M") Setting r0
+
+lbn r0 TankIns HASH("TankVol") Temperature Sum
+sub r0 r0 Kelvin
+sbn LedM HASH("VolT") Setting r0
+lbn r0 TankIns HASH("TankVol") Pressure Sum
+sbn LedM HASH("VolP") Setting r0
+lbn r0 TankIns HASH("TankVol") Quantity Sum
+sbn LedS HASH("VolM") Setting r0
+
+lbn r0 TankIns HASH("TankO2") Temperature Sum
+sub r0 r0 Kelvin
+sbn LedM HASH("O2T") Setting r0
+lbn r0 TankIns HASH("TankO2") Pressure Sum
+sbn LedM HASH("O2P") Setting r0
+lbn r0 TankIns HASH("TankO2") Quantity Sum
+sbn LedS HASH("O2M") Setting r0
+
+j loop
