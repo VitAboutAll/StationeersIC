@@ -1,0 +1,117 @@
+#Baza Vulkan - CO2 and Temp by VitAboutAll
+alias SensorCO2 d0
+alias LedCO2 d1
+alias LeverOutO2 d2
+alias LedTemp d3
+alias FarmOmni d4
+alias FilterO2 d5
+
+alias RatioCO2 r1
+alias ActivateVentilCO2 r2
+alias Temp r3
+alias SelectedCO2 r5
+alias LeverO2Open r6
+alias NeedCool r7
+alias meteo1 r8
+alias SelectedTemp r9
+
+define MinCO2 0.03
+define MaxCO2 0.031
+define Kelvin 273.15
+define MinTemp 22
+define MaxTemp 23
+
+define ValveTemp -1280984102
+define LedLightType1 1944485013
+define LedLightType2 576516101
+define RoundLight 1514476632
+define LongWallLamp 797794350
+define weather 1997212478
+define LedSm -815193061
+define LedMiddle -53151617
+define speaker -828056979
+define dimmer 554524804
+define tankInsul 272136332
+
+init:
+sbn LedMiddle HASH("MidLedStorm") On 1
+sbn LedMiddle HASH("MidLedStorm") Mode 0
+sbn LedSm HASH("LedSmO2Press") On 1
+sbn LedSm HASH("LedSmO2Quant") On 1
+sb weather On 1
+s LedCO2 On 1
+s LedCO2 Mode 1
+#s VentilCO2 On 0
+s LedTemp On 1
+s FilterO2 On 0
+#sb ValveTemp On 0
+move SelectedCO2 MinCO2
+move SelectedTemp MaxTemp
+jal alarmOn
+yield
+
+start:
+l RatioCO2 SensorCO2 RatioCarbonDioxide
+s LedCO2 Setting RatioCO2
+
+l Temp SensorCO2 Temperature
+sub Temp Temp Kelvin
+s LedTemp Setting Temp
+sge NeedCool Temp SelectedTemp
+select SelectedTemp NeedCool MinTemp MaxTemp
+s FarmOmni On NeedCool
+
+lbn r0 tankInsul HASH("TankFarmO2") Pressure Sum
+sbn LedSm HASH("LedSmO2Press") Setting r0
+lbn r0 tankInsul HASH("TankFarmO2") Quantity Sum
+sbn LedSm HASH("LedSmO2Quant") Setting r0
+
+l LeverO2Open LeverOutO2 Open
+s FilterO2 On LeverO2Open
+
+#l SunActive LightSensor Activate
+#sb RoundLight On SunActive
+#sb LongWallLamp On SunActive
+
+#weather
+lb meteo1 weather Mode Sum
+s db Setting meteo1
+beqal meteo1 0 speakerOff     #noStorm
+beqal meteo1 1 stormInComing  #stormInComing
+beqal meteo1 2 speakerOff     #inStorm
+
+yield
+j start
+
+stormInComing:
+lb meteo1 weather NextWeatherEventTime Sum
+floor meteo1 meteo1
+sbn LedMiddle HASH("MidLedStorm") Setting meteo1
+beq meteo1 550 speakerOff
+beq meteo1 500 speakerOn
+beq meteo1 490 speakerOff
+beq meteo1 450 speakerOn
+beq meteo1 440 speakerOff
+beq meteo1 400 speakerOn
+beq meteo1 350 speakerOff
+beq meteo1 300 speakerOn
+beq meteo1 250 speakerOff
+beq meteo1 200 speakerOn
+beq meteo1 150 speakerOff
+beq meteo1 100 speakerOn
+beq meteo1 50 speakerOff
+beq meteo1 40 alarmOn
+j ra
+
+speakerOn:
+sb speaker Mode 18
+sb speaker On 1
+j ra
+speakerOff:
+sbn LedMiddle HASH("MidLedStorm") Setting 0
+sb speaker On 0
+j ra
+alarmOn:
+sb speaker Mode 1
+sb speaker On 1
+j ra
