@@ -1,0 +1,105 @@
+#Rocket by VitAboutAll
+# connections to socket:
+alias LedFuel d0
+alias LedStatus d1
+alias LedCollGoods d2
+alias LedStore d3
+alias Dimmer d4
+alias LeverStore d5
+alias NeedGoHome r0
+define ReturnStoreCount 600
+define RocketCabine 1556756312
+define RocketOreDrill -2027419821
+define RocketStore 906210602
+define RocketIceDrill 74521920
+define LedMidHash -53151617
+move NeedGoHome 0
+s Dimmer Mode 7
+s db Setting 0
+loop:
+s db Setting 991
+jal ShowData
+yield
+jal CheckFuel
+beq NeedGoHome 1 ReturnHome
+sb RocketOreDrill Mode 0
+sb RocketIceDrill Mode 0
+l r12 Dimmer Setting
+beq r12 5 ReturnHome
+
+lb r12 RocketCabine Mode Sum
+beq r12 4 Work
+s db Setting 992
+yield
+j loop
+
+ShowData:
+lb r1 RocketCabine Fuel Sum
+lb r2 RocketCabine Mode Sum
+lb r3 RocketCabine CollectableGoods Sum
+lb r4 RocketStore Quantity Sum
+s LedFuel Setting r1
+s LedStatus Setting r2
+s LedCollGoods Setting r3
+s LedStore Setting r4
+sbn LedMidHash HASH("LedRocketStore") Setting r4
+j ra
+
+ReturnHome:
+sb RocketOreDrill Activate 0
+sb RocketIceDrill Activate 0
+sb RocketCabine Activate 5
+move NeedGoHome 0
+yield
+jal ShowData
+s Dimmer Setting 0
+sb RocketCabine Activate 0
+j loop
+
+Work:
+s db Setting 441
+yield
+jal ShowData
+jal CheckFuel
+beq NeedGoHome 1 ReturnHome
+#
+l r12 Dimmer Setting
+beq r12 5 ReturnHome
+#
+lb r13 RocketCabine CollectableGoods Average
+yield
+beqz r13 Travel
+#
+sb RocketOreDrill Activate 1
+sb RocketIceDrill Activate 1
+####lb r12 RocketStore Maximum Sum
+lb r13 RocketStore Quantity Sum
+bge r13 ReturnStoreCount ReturnHome
+s db Setting 442
+j Work
+
+Travel:
+s db Setting 221
+yield
+jal ShowData
+jal CheckFuel
+beq NeedGoHome 1 ReturnHome
+l r12 Dimmer Setting
+beq r12 5 ReturnHome
+sb RocketOreDrill Activate 0
+sb RocketIceDrill Activate 0
+yield
+s db Setting 222
+sb RocketCabine Activate 3
+yield
+sb RocketCabine Activate 2
+lb r12 RocketCabine Mode Sum
+s db Setting r12
+yield
+j loop
+
+CheckFuel:
+lb r10 RocketCabine Fuel Sum
+lb r11 RocketCabine ReturnFuelCost Sum
+slt NeedGoHome r10 r11
+j ra
